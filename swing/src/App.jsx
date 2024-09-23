@@ -50,7 +50,6 @@ function App() {
     return dateArray;
   };
 
-  // Vérifie si la plage de dates est valide
   const validateDates = () => {
     if (startDate > endDate) {
       setError("La date de fin doit être postérieure à la date de début.");
@@ -60,7 +59,6 @@ function App() {
     return true;
   };
 
-  // Utilisation de useMemo pour générer les données du graphique
   const graphData = useMemo(() => {
     if (!validateDates()) return { labels: [], datasets: [] };
 
@@ -101,7 +99,6 @@ function App() {
 
   return (
     <div style={{ display: "flex", justifyContent: "space-between", width: "90vw" }}>
-      {/* Formulaire à gauche */}
       <div style={{ width: '40%', display: "flex", justifyContent: "start" }}>
         <form style={{ display: "flex", flexDirection: "column", alignItems: "start" }}>
           <div>
@@ -169,7 +166,6 @@ function App() {
         </form>
       </div>
 
-      {/* Graphique à droite */}
       <div style={{ width: "55%" }}>
         <span>Patrimoine : possesseur : <b>{selectedPatrimoine}</b></span>
         <Line
