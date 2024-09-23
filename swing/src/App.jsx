@@ -40,13 +40,12 @@ function App() {
   const [endDate, setEndDate] = useState(new Date("2024-09-28"));
   const [error, setError] = useState(null);
 
-  // Fonction pour générer les labels de l'axe X basés sur la plage de dates
   const generateDateLabels = (start, end) => {
     let dateArray = [];
     let currentDate = start;
     while (currentDate <= end) {
       dateArray.push(format(currentDate, "yyyy-MM-dd"));
-      currentDate = addDays(currentDate, 1); // Incrémente par jour
+      currentDate = addDays(currentDate, 1);
     }
     return dateArray;
   };
