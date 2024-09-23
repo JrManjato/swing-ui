@@ -6,7 +6,7 @@ import "react-datepicker/dist/react-datepicker.css";
 
 import {
   Chart as ChartJS,
-  CategoryScale,  
+  CategoryScale,
   LinearScale,
   PointElement,
   LineElement,
@@ -29,7 +29,7 @@ ChartJS.register(
 );
 
 function App() {
-  const [selectedPatrimoine, setSelectedPatrimoine] = useState("");
+  const [selectedPatrimoine, setSelectedPatrimoine] = useState("Cresus");
   const [selectedCurves, setSelectedCurves] = useState({
     agregat: true,
     tresorerie: false,
@@ -37,7 +37,7 @@ function App() {
     obligations: false,
   });
   const [startDate, setStartDate] = useState(new Date("2024-09-23"));
-  const [endDate, setEndDate] = useState(new Date("2024-10-02"));
+  const [endDate, setEndDate] = useState(new Date("2024-09-28"));
   const [error, setError] = useState(null);
 
   // Fonction pour générer les labels de l'axe X basés sur la plage de dates
@@ -101,55 +101,98 @@ function App() {
   }, [startDate, endDate, selectedCurves]);
 
   return (
-    <div>
-      <form>
-        <label>Type de Patrimoine</label>
-        <select onChange={(e) => setSelectedPatrimoine(e.target.value)}>
-          <option value="">Choisir...</option>
-          <option value="patrimoine1">Patrimoine 1</option>
-          <option value="patrimoine2">Patrimoine 2</option>
-        </select>
+    <div style={{ display: "flex", justifyContent: "space-between", width: "90vw" }}>
+      {/* Formulaire à gauche */}
+      <div style={{ width: '40%', display: "flex", justifyContent: "start" }}>
+        <form style={{ display: "flex", flexDirection: "column", alignItems: "start" }}>
+          <div>
+            <label>Patrimoine : </label>
+            <select onChange={(e) => setSelectedPatrimoine(e.target.value)}>
+              <option value="Cresus">Cresus</option>
+              <option value="Cesar">Cesar</option>
+            </select>
+          </div>
 
-        <div>
-          <label>Choisir les courbes à afficher :</label>
-          {["agregat", "tresorerie", "immobilisations", "obligations"].map(
-            (curve) => (
-              <div key={curve}>
-                <input
-                  type="checkbox"
-                  id={curve}
-                  checked={selectedCurves[curve]}
-                  onChange={() =>
-                    setSelectedCurves({
-                      ...selectedCurves,
-                      [curve]: !selectedCurves[curve],
-                    })
-                  }
-                />
-                <label htmlFor={curve}>{curve}</label>
+          <div>
+            <div style={{ display: "flex", flexDirection: "row" }}>
+              {["agregat", "tresorerie", "immobilisations", "obligations"].map((curve) => (
+                <div key={curve} style={{ display: "flex", justifyContent: "start", marginRight: '5px' }}>
+                  <input
+                    type="checkbox"
+                    id={curve}
+                    checked={selectedCurves[curve]}
+                    onChange={() =>
+                      setSelectedCurves({
+                        ...selectedCurves,
+                        [curve]: !selectedCurves[curve],
+                      })
+                    }
+                  />
+                  <label htmlFor={curve}>{curve}</label>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <div style={{ width: "230px" }}>
+              <label>De : </label>
+              <DatePicker selected={startDate} onChange={(date) => setStartDate(date)} />
+            </div>
+            <div style={{ width: "230px" }}>
+              <label>À : </label>
+              <DatePicker selected={endDate} onChange={(date) => setEndDate(date)} />
+            </div>
+          </div>
+
+          {error && <p style={{ color: "red" }}>{error}</p>}
+
+          <div style={{border: "1px solid gray", width: '100%', paddingInline: '15px'}}>
+            <h4 style={{textTransform: "capitalize"}}>!! Flux impossible !!</h4>
+            {generateDateLabels(startDate, endDate).slice(0, 1).map((date, index) => (
+              <div key={index} style={{ display: "flex", width: "100%" }}>
+                <span>[{date}]</span>
+                <span>[{selectedPatrimoine}] Flux : {Math.floor(Math.random() * (1000 - (-1000)) + (-1000))} €</span>
               </div>
-            )
-          )}
-        </div>
+            ))}
+          </div>
 
-        <div>
-          <label>Date de début :</label>
-          <DatePicker
-            selected={startDate}
-            onChange={(date) => setStartDate(date)}
-          />
-          <label>Date de fin :</label>
-          <DatePicker
-            selected={endDate}
-            onChange={(date) => setEndDate(date)}
-          />
-        </div>
+          <div style={{border: "1px solid gray", width: '100%', paddingInline: '15px'}}>
+            <h4>!! Flux journalier !!</h4>
+            {generateDateLabels(startDate, endDate).map((date, index) => (
+              <div key={index} style={{ display: "flex", width: "100%" }}>
+                <span>[{date}]</span>
+                <span>[{selectedPatrimoine}] Flux : {Math.floor(Math.random() * (1000 - (-1000)) + (-1000))} €</span>
+              </div>
+            ))}
+          </div>
 
-        {error && <p style={{ color: "red" }}>{error}</p>}
-      </form>
+        </form>
+      </div>
 
-      <Line data={graphData} />
+      {/* Graphique à droite */}
+      <div style={{ width: "55%" }}>
+        <span>Patrimoine : possesseur : <b>{selectedPatrimoine}</b></span>
+        <Line
+          style={{ width: '50vw', height: '50vh' }}
+          data={graphData}
+          options={{
+            responsive: true,
+            plugins: {
+              legend: {
+                display: true,
+                position: 'top',
+              },
+              title: {
+                display: true,
+                text: 'Évolution du patrimoine',
+              },
+            },
+          }}
+        />
+      </div>
     </div>
+
   );
 }
 
