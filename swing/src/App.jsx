@@ -1,5 +1,5 @@
 import './App.css'
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Line } from "react-chartjs-2";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -15,6 +15,9 @@ import {
   Legend,
 } from 'chart.js';
 
+import addDays from "date-fns/addDays";
+import format from "date-fns/format";
+
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -28,60 +31,77 @@ ChartJS.register(
 function App() {
   const [selectedPatrimoine, setSelectedPatrimoine] = useState("");
   const [selectedCurves, setSelectedCurves] = useState({
-    agregat: false,
+    agregat: true,
     tresorerie: false,
     immobilisations: false,
     obligations: false,
   });
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date());
+  const [startDate, setStartDate] = useState(new Date("2024-09-23"));
+  const [endDate, setEndDate] = useState(new Date("2024-10-02"));
+  const [error, setError] = useState(null);
 
-  const dataFictives = {
-    agregat: [20000, 15000, 18000, 30000],
-    tresorerie: [50000, 40000, 45000, 47000],
-    immobilisations: [10000, 12000, 14000, 11000],
-    obligations: [-50000, -60000, -55000, -53000],
+  // Fonction pour générer les labels de l'axe X basés sur la plage de dates
+  const generateDateLabels = (start, end) => {
+    let dateArray = [];
+    let currentDate = start;
+    while (currentDate <= end) {
+      dateArray.push(format(currentDate, "yyyy-MM-dd"));
+      currentDate = addDays(currentDate, 1); // Incrémente par jour
+    }
+    return dateArray;
   };
 
-  const generateGraphData = () => {
-    const labels = ["2022-01", "2022-02", "2022-03", "2022-04"]; // À ajuster selon les dates
+  // Vérifie si la plage de dates est valide
+  const validateDates = () => {
+    if (startDate > endDate) {
+      setError("La date de fin doit être postérieure à la date de début.");
+      return false;
+    }
+    setError(null);
+    return true;
+  };
+
+  // Utilisation de useMemo pour générer les données du graphique
+  const graphData = useMemo(() => {
+    if (!validateDates()) return { labels: [], datasets: [] };
+
+    const labels = generateDateLabels(startDate, endDate);
     const datasets = [];
 
     if (selectedCurves.agregat) {
       datasets.push({
         label: "Agrégat",
-        data: dataFictives.agregat,
+        data: Array(labels.length).fill().map(() => Math.floor(Math.random() * (100000 + 80000) - 80000)),
         borderColor: "blue",
       });
     }
     if (selectedCurves.tresorerie) {
       datasets.push({
         label: "Trésorerie",
-        data: dataFictives.tresorerie,
+        data: Array(labels.length).fill().map(() => Math.floor(Math.random() * (100000 + 80000) - 80000)),
         borderColor: "green",
       });
     }
     if (selectedCurves.immobilisations) {
       datasets.push({
         label: "Immobilisations",
-        data: dataFictives.immobilisations,
+        data: Array(labels.length).fill().map(() => Math.floor(Math.random() * (100000 + 80000) - 80000)),
         borderColor: "red",
       });
     }
     if (selectedCurves.obligations) {
       datasets.push({
         label: "Obligations",
-        data: dataFictives.obligations,
+        data: Array(labels.length).fill().map(() => Math.floor(Math.random() * (100000 + 80000) - 80000)),
         borderColor: "purple",
       });
     }
 
     return { labels, datasets };
-  };
+  }, [startDate, endDate, selectedCurves]);
 
   return (
-    <>
-       <div>
+    <div>
       <form>
         <label>Type de Patrimoine</label>
         <select onChange={(e) => setSelectedPatrimoine(e.target.value)}>
@@ -114,16 +134,23 @@ function App() {
 
         <div>
           <label>Date de début :</label>
-          <DatePicker selected={startDate} onChange={(date) => setStartDate(date)} />
+          <DatePicker
+            selected={startDate}
+            onChange={(date) => setStartDate(date)}
+          />
           <label>Date de fin :</label>
-          <DatePicker selected={endDate} onChange={(date) => setEndDate(date)} />
+          <DatePicker
+            selected={endDate}
+            onChange={(date) => setEndDate(date)}
+          />
         </div>
+
+        {error && <p style={{ color: "red" }}>{error}</p>}
       </form>
 
-      <Line data={generateGraphData()} />
+      <Line data={graphData} />
     </div>
-    </>
-  )
+  );
 }
 
-export default App
+export default App;
